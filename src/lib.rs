@@ -10,6 +10,7 @@ use serde_json::Value;
 mod error;
 /// Client to interact with Dolibarr API
 /// contains a reqwest::Client with predefined headers and an Url.
+#[derive(Clone)]
 pub struct Client {
     client: ReqClient,
     uri: Url,
