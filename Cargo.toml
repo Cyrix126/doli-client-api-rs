@@ -1,0 +1,12 @@
+[package]
+name = "doli-client-api-rs"
+version = "0.1.0"
+authors = ["cyrix126 <cyrix126@baermail.fr>"]
+description = "High level opiniated Rust client library for Dolibarr API"
+documentation = "https://github.com/cyrix126/doli-client-api-rs"
+edition = "2021"
+
+[dependencies]
+reqwest = {version="0.12", default-features=false, features=["http2", "rustls-tls", "json"]}
+thiserror = "1"
+serde_json = "1"
