@@ -7,7 +7,7 @@ use reqwest::{
 };
 use serde_json::Value;
 /// errors module for this crate, transmitting error made by misuse of the client at runtime or issue with the Dolibarr API backend.
-mod error;
+pub mod error;
 /// Client to interact with Dolibarr API
 /// contains a reqwest::Client with predefined headers and an Url.
 #[derive(Clone)]
@@ -17,7 +17,7 @@ pub struct Client {
 }
 
 /// construct a doli-client-api-rs Client struct to be used with every high level functions.
-pub fn client_doli(token: &str, uri: Url) -> Client {
+pub fn client_doli(token: &str, uri: &Url) -> Client {
     let mut headers = HeaderMap::new();
     headers.insert(
         ACCEPT,
