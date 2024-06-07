@@ -17,7 +17,7 @@ pub struct Client {
 }
 
 /// construct a doli-client-api-rs Client struct to be used with every high level functions.
-pub fn client_doli(token: &str, uri: &Url) -> Client {
+pub fn client_doli(token: &str, uri: Url) -> Client {
     let mut headers = HeaderMap::new();
     headers.insert(
         ACCEPT,
