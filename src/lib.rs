@@ -77,6 +77,18 @@ pub async fn get_label_from_id(client: &Client, id: u32) -> Result<String, DoliA
         .to_string())
 }
 
+/// get all existents ids of the product table
+pub async fn get_all_products(client: &Client) -> Result<Vec<u32>, DoliApiClientError> {
+    let url = [client.uri.as_str(), "/products?limit=0&ids_only=true"].concat();
+    let resp = client.client.get(url).send().await?;
+    let json = resp.json::<Vec<String>>().await?;
+    let mut ids = vec![];
+    for id in json {
+        ids.push(id.parse().unwrap());
+    }
+    Ok(ids)
+}
+
 /// check a response status and body to verify if an the error of product not found from Dolibarr is present.
 /// return the error IdDoesNotExist if that's the case.
 fn product_exist(status: &StatusCode, json: &Value) -> Result<(), DoliApiClientError> {
