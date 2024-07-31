@@ -16,31 +16,33 @@ pub struct Client {
     uri: Url,
 }
 
-/// construct a doli-client-api-rs Client struct to be used with every high level functions.
-pub fn client_doli(token: &str, uri: Url) -> Client {
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        ACCEPT,
-        "application/json"
-            .parse()
-            .expect("can not parse value of header"),
-    );
-    headers.insert(
-        AUTHORIZATION,
-        token.parse().expect("can not parse value of header"),
-    );
-    headers.insert(
-        CONTENT_TYPE,
-        "application/json"
-            .parse()
-            .expect("can not parse value of header"),
-    );
-    Client {
-        client: ClientBuilder::new()
-            .default_headers(headers)
-            .build()
-            .expect("client can not be build"),
-        uri,
+impl Client {
+    /// construct a doli-client-api-rs Client struct to be used with every high level functions.
+    pub fn new(token: &str, uri: Url) -> Client {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            ACCEPT,
+            "application/json"
+                .parse()
+                .expect("can not parse value of header"),
+        );
+        headers.insert(
+            AUTHORIZATION,
+            token.parse().expect("can not parse value of header"),
+        );
+        headers.insert(
+            CONTENT_TYPE,
+            "application/json"
+                .parse()
+                .expect("can not parse value of header"),
+        );
+        Client {
+            client: ClientBuilder::new()
+                .default_headers(headers)
+                .build()
+                .expect("client can not be build"),
+            uri,
+        }
     }
 }
 
