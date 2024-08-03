@@ -9,8 +9,8 @@ Example:
 // construct the client and give the url
 let token = "secret";
 let uri = Url::parse("https://dolibarr.example.com/api/index.php")?;
-let client = client_doli(token, uri);
+let doli_client = client_doli(token, uri);
 
 // get the barcode with the id
-let barcode = get_barcode_from_id(client, 1094)?;
+let barcode = doli_client.get_barcode_from_id(1094)?;
 ```

@@ -5,6 +5,7 @@ use reqwest::{
     header::{HeaderMap, ACCEPT, AUTHORIZATION, CONTENT_TYPE},
     Client as ReqClient, ClientBuilder, StatusCode, Url,
 };
+use serde::Deserialize;
 use serde_json::Value;
 /// errors module for this crate, transmitting error made by misuse of the client at runtime or issue with the Dolibarr API backend.
 pub mod error;
@@ -44,51 +45,121 @@ impl Client {
             uri,
         }
     }
-}
-
-/// Use only with a client constructed with the function client_doli().
-/// Return the barcode of a product if it exist.
-/// Return an error if it doesn't exist.
-pub async fn get_barcode_from_id(
-    client: &Client,
-    id: u32,
-) -> Result<Option<String>, DoliApiClientError> {
-    let url = [client.uri.as_str(), "/products/", &id.to_string()].concat();
-    let resp = client.client.get(url).send().await?;
-    let status = resp.status();
-    let json = resp.json::<Value>().await?;
-    product_exist(&status, &json)?;
-    if let Some(value) = json.get("barcode") {
-        if let Some(str) = value.as_str() {
-            return Ok(Some(str.to_string()));
+    /// Use only with a client constructed with the function client_doli().
+    /// Return the barcode of a product if it exist.
+    /// Return an error if it doesn't exist.
+    pub async fn get_barcode_from_id(&self, id: u32) -> Result<Option<String>, DoliApiClientError> {
+        let url = [self.uri.as_str(), "/products/", &id.to_string()].concat();
+        let resp = self.client.get(url).send().await?;
+        let status = resp.status();
+        let json = resp.json::<Value>().await?;
+        product_exist(&status, &json)?;
+        if let Some(value) = json.get("barcode") {
+            if let Some(str) = value.as_str() {
+                return Ok(Some(str.to_string()));
+            }
         }
+        Ok(None)
     }
-    Ok(None)
-}
-/// get the label of a product with the id.
-pub async fn get_label_from_id(client: &Client, id: u32) -> Result<String, DoliApiClientError> {
-    let url = [client.uri.as_str(), "/products/", &id.to_string()].concat();
-    let resp = client.client.get(url).send().await?;
-    let status = resp.status();
-    let json = resp.json::<Value>().await?;
-    product_exist(&status, &json)?;
+    /// get the label of a product with the id.
+    pub async fn get_label_from_id(&self, id: u32) -> Result<String, DoliApiClientError> {
+        let url = [self.uri.as_str(), "/products/", &id.to_string()].concat();
+        let resp = self.client.get(url).send().await?;
+        let status = resp.status();
+        let json = resp.json::<Value>().await?;
+        product_exist(&status, &json)?;
 
-    Ok(json
-        .get("label")
-        .expect("field label is always present for product")
-        .to_string())
-}
-
-/// get all existents ids of the product table
-pub async fn get_all_products(client: &Client) -> Result<Vec<u32>, DoliApiClientError> {
-    let url = [client.uri.as_str(), "/products?limit=0&ids_only=true"].concat();
-    let resp = client.client.get(url).send().await?;
-    let json = resp.json::<Vec<String>>().await?;
-    let mut ids = vec![];
-    for id in json {
-        ids.push(id.parse().unwrap());
+        Ok(json
+            .get("label")
+            .expect("field label is always present for product")
+            .to_string())
     }
-    Ok(ids)
+    /// get all existents ids of the product table
+    pub async fn get_all_products(&self) -> Result<Vec<u32>, DoliApiClientError> {
+        let url = [self.uri.as_str(), "/products?limit=0&ids_only=true"].concat();
+        let resp = self.client.get(url).send().await?;
+        let json = resp.json::<Vec<String>>().await?;
+        let mut ids = vec![];
+        for id in json {
+            ids.push(id.parse().unwrap());
+        }
+        Ok(ids)
+    }
+    /// return personal data of client from email.
+    /// Can be used to retrieve the id.
+    pub async fn get_data_from_email(
+        &self,
+        email: String,
+    ) -> Result<CustomerData, DoliApiClientError> {
+        let url = [self.uri.as_str(), "thirdparties/email/", &email].concat();
+        let resp = self.client.get(url).send().await?;
+        let json = resp.json::<CustomerData>().await?;
+        Ok(json)
+    }
+    /// return personal data from id
+    pub async fn customer_data_from_id(&self, id: u32) -> Result<CustomerData, DoliApiClientError> {
+        let url = format!("{}/thirdparties/{id}", self.uri);
+        let resp = self.client.get(url).send().await?;
+        let json = resp.json::<CustomerData>().await?;
+        Ok(json)
+    }
+    /// return orders of a client
+    pub async fn get_order_from_id(&self, id: u32) -> Result<Vec<Document>, DoliApiClientError> {
+        let url = format!("{}/orders?thirdparty_ids={id}", self.uri);
+        let resp = self.client.get(url).send().await?;
+        let json = resp.json::<Vec<Document>>().await?;
+        Ok(json)
+    }
+    /// return invoices of a client
+    pub async fn get_invoices_from_id(&self, id: u32) -> Result<Vec<Document>, DoliApiClientError> {
+        let url = format!("{}/invoices?thirdparty_ids={id}", self.uri);
+        let resp = self.client.get(url).send().await?;
+        let json = resp.json::<Vec<Document>>().await?;
+        Ok(json)
+    }
+}
+/// Contact information of custommer
+#[derive(Deserialize)]
+pub struct CustomerData {
+    /// the id present in the database of the thirdparty
+    pub id: u32,
+    /// Full name of the customer
+    pub name: String,
+    /// Phone number
+    pub phone: String,
+    /// Email address
+    pub email: String,
+    /// Street number and Street name
+    pub address: String,
+    /// Postal code
+    pub zip: String,
+    /// Town
+    pub town: String,
+}
+#[derive(Deserialize)]
+/// Document can be an order or an invoice. They share the same attributes.
+pub struct Document {
+    /// id of document in the database
+    pub id: u32,
+    #[serde(rename(deserialize = "ref"))]
+    /// reference publicly available
+    pub reference: String,
+    #[serde(rename(deserialize = "total_ht"))]
+    /// total price HT
+    pub price: f32,
+    /// the lines composing the document
+    pub lines: Vec<Line>,
+}
+
+#[derive(Deserialize)]
+/// Line of a document.
+pub struct Line {
+    /// id of line in dolibarr database
+    pub id: u32,
+    /// qty of the product in this line
+    pub qty: u32,
+    /// id of product
+    pub fk_product: u32,
 }
 
 /// check a response status and body to verify if an the error of product not found from Dolibarr is present.
