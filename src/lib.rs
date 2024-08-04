@@ -45,7 +45,6 @@ impl Client {
             uri,
         }
     }
-    /// Use only with a client constructed with the function client_doli().
     /// Return the barcode of a product if it exist.
     /// Return an error if it doesn't exist.
     pub async fn get_barcode_from_id(&self, id: u32) -> Result<Option<String>, DoliApiClientError> {
