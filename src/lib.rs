@@ -1,5 +1,6 @@
 #![warn(missing_docs)]
 #![doc = include_str!("../README.md")]
+use dolibarr_lib_rs::product::Product;
 use error::DoliApiClientError;
 use reqwest::{
     header::{HeaderMap, ACCEPT, AUTHORIZATION, CONTENT_TYPE},
@@ -11,7 +12,7 @@ use serde_json::Value;
 pub mod error;
 /// Client to interact with Dolibarr API
 /// contains a reqwest::Client with predefined headers and an Url.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Client {
     client: ReqClient,
     uri: Url,
@@ -45,6 +46,14 @@ impl Client {
             uri,
         }
     }
+    /// get product details from id
+    pub async fn get_product_from_id(&self, id: u32) -> Result<Product, DoliApiClientError> {
+        let url = [self.uri.as_str(), "/products/", &id.to_string()].concat();
+        let resp = self.client.get(url).send().await?;
+        let product = resp.json::<Product>().await?;
+        Ok(product)
+    }
+
     /// Return the barcode of a product if it exist.
     /// Return an error if it doesn't exist.
     pub async fn get_barcode_from_id(&self, id: u32) -> Result<Option<String>, DoliApiClientError> {
