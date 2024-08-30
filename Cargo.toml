@@ -11,3 +11,10 @@ reqwest = {version="0.12", default-features=false, features=["http2", "rustls-tl
 thiserror = "1"
 serde_json = "1"
 serde = {version="1.0", features=["derive"]}
+dolibarr-lib-rs = { git="https://github.com/Cyrix126/dolibarr-lib-rs"}
+
+[features]
+default=[]
+bookstore=["dolibarr-lib-rs/bookstore"]
+dilicom=["dolibarr-lib-rs/dilicom"]
+rakuten=["dolibarr-lib-rs/rakuten"]
