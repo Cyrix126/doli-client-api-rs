@@ -127,7 +127,7 @@ impl Client {
     }
 }
 /// Contact information of custommer
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct CustomerData {
     /// the id present in the database of the thirdparty
     pub id: u32,
