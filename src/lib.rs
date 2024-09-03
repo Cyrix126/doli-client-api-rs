@@ -6,7 +6,7 @@ use reqwest::{
     header::{HeaderMap, ACCEPT, AUTHORIZATION, CONTENT_TYPE},
     Client as ReqClient, ClientBuilder, StatusCode, Url,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 /// errors module for this crate, transmitting error made by misuse of the client at runtime or issue with the Dolibarr API backend.
 pub mod error;
@@ -103,6 +103,22 @@ impl Client {
         let resp = self.client.get(url).send().await?;
         let json = resp.json::<CustomerData>().await?;
         Ok(json)
+    }
+    /// update data of client
+    /// Can be used to retrieve the id.
+    pub async fn update_customer_data(
+        &self,
+        id: u32,
+        data: &CustomerData,
+    ) -> Result<(), DoliApiClientError> {
+        let url = format!("{}thirdparties/{}", self.uri, id);
+        self.client
+            .put(url)
+            .json(data)
+            .send()
+            .await?
+            .error_for_status()?;
+        Ok(())
     }
     /// return personal data from id
     pub async fn customer_data_from_id(&self, id: u32) -> Result<CustomerData, DoliApiClientError> {
