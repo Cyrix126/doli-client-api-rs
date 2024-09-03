@@ -160,7 +160,7 @@ pub struct CustomerData {
     /// Town
     pub town: String,
 }
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 /// Document can be an order or an invoice. They share the same attributes.
 pub struct Document {
     /// id of document in the database
@@ -175,7 +175,7 @@ pub struct Document {
     pub lines: Vec<Line>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 /// Line of a document.
 pub struct Line {
     /// id of line in dolibarr database
