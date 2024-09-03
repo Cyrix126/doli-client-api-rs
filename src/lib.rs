@@ -120,6 +120,22 @@ impl Client {
             .error_for_status()?;
         Ok(())
     }
+    /// create a new order
+    /// Can be used to retrieve the id.
+    // todo! json fields can be different from bills
+    // maybe need to use custom serialization same as for product
+    // socid must be the id of the customer, it must be included in the data sent.
+    pub async fn post_new_order(&self, id: u32, data: &Document) -> Result<(), DoliApiClientError> {
+        let url = format!("{}orders/{}", self.uri, id);
+        // create new order and get id
+        self.client
+            .put(url)
+            .json(data)
+            .send()
+            .await?
+            .error_for_status()?;
+        Ok(())
+    }
     /// return personal data from id
     pub async fn customer_data_from_id(&self, id: u32) -> Result<CustomerData, DoliApiClientError> {
         let url = format!("{}/thirdparties/{id}", self.uri);
