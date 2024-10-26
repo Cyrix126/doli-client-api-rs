@@ -20,7 +20,11 @@ pub struct Client {
 
 impl Client {
     /// construct a doli-client-api-rs Client struct to be used with every high level functions.
-    pub fn new(token: &str, uri: Url) -> Client {
+    pub fn new(uri: Url) -> Result<Client, DoliApiClientError> {
+        let token = uri
+            .password()
+            .ok_or(DoliApiClientError::InvalidToken)?
+            .to_owned();
         let mut headers = HeaderMap::new();
         headers.insert(
             ACCEPT,
@@ -30,7 +34,9 @@ impl Client {
         );
         headers.insert(
             AUTHORIZATION,
-            token.parse().expect("can not parse value of header"),
+            token
+                .parse()
+                .map_err(|_| DoliApiClientError::InvalidToken)?,
         );
         headers.insert(
             CONTENT_TYPE,
@@ -38,13 +44,13 @@ impl Client {
                 .parse()
                 .expect("can not parse value of header"),
         );
-        Client {
+        Ok(Client {
             client: ClientBuilder::new()
                 .default_headers(headers)
                 .build()
                 .expect("client can not be build"),
             uri,
-        }
+        })
     }
     /// get product details from id
     pub async fn get_product_from_id(&self, id: u32) -> Result<Product, DoliApiClientError> {

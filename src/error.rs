@@ -9,4 +9,7 @@ pub enum DoliApiClientError {
     /// The API response status code is an error.
     #[error(transparent)]
     ReqwestError(#[from] reqwest::Error),
+    /// Dolibarr API always needs a token. If it is empty or contains invalid caracters, this error will be returned.
+    #[error("Invalid token for Dolibarr API")]
+    InvalidToken,
 }
