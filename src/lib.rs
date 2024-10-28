@@ -110,6 +110,14 @@ impl Client {
         let json = resp.json::<CustomerData>().await?;
         Ok(json)
     }
+    /// return personal data of client from email.
+    /// Can be used to retrieve the id.
+    pub async fn get_data_from_id(&self, id: u32) -> Result<CustomerData, DoliApiClientError> {
+        let url = [self.uri.as_str(), "thirdparties/", &id.to_string()].concat();
+        let resp = self.client.get(url).send().await?;
+        let json = resp.json::<CustomerData>().await?;
+        Ok(json)
+    }
     /// update data of client
     /// Can be used to retrieve the id.
     pub async fn update_customer_data(
