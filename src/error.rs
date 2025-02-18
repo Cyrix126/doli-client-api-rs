@@ -8,8 +8,11 @@ pub enum DoliApiClientError {
     IdDoesNotExist,
     /// The API response status code is an error.
     #[error(transparent)]
-    ReqwestError(#[from] reqwest::Error),
+    Reqwest(#[from] reqwest::Error),
     /// Dolibarr API always needs a token. If it is empty or contains invalid characters, this error will be returned.
     #[error("Invalid token for Dolibarr API")]
     InvalidToken,
+    /// Response from Dolibarr API does not contain what was expected
+    #[error("Non expected Response")]
+    UnexpectedResponse,
 }
