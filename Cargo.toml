@@ -12,6 +12,8 @@ thiserror = "1"
 serde_json = "1"
 serde = {version="1.0", features=["derive"]}
 dolibarr-lib-rs = { git="https://github.com/Cyrix126/dolibarr-lib-rs"}
+url = {version="2.5", features=["serde"]}
+get_pass = {git="https://github.com/Cyrix126/get_pass"}
 
 [features]
 default=[]

@@ -2,6 +2,8 @@
 #![doc = include_str!("../README.md")]
 /// client module to create an http client that can interact with the dolibarr API
 pub mod client;
+/// configuration to interact with a Dolibarr instance
+pub mod config;
 /// customer module for CRUD operations on customers
 pub mod customer;
 /// errors module for this crate, transmitting error made by misuse of the client at runtime or issue with the Dolibarr API backend.

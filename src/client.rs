@@ -1,10 +1,11 @@
 #![warn(missing_docs)]
+use get_pass::get_password;
 use reqwest::{
     header::{HeaderMap, ACCEPT, AUTHORIZATION, CONTENT_TYPE},
     Client as ReqClient, ClientBuilder, Url,
 };
 
-use crate::error::DoliApiClientError;
+use crate::{config::Config, error::DoliApiClientError};
 /// Client to interact with Dolibarr API
 /// contains a reqwest::Client with predefined headers and an Url.
 #[derive(Clone, Debug)]
@@ -15,11 +16,8 @@ pub struct Client {
 
 impl Client {
     /// construct a doli-client-api-rs Client struct to be used with every high level functions.
-    pub fn new(uri: Url) -> Result<Client, DoliApiClientError> {
-        let token = uri
-            .password()
-            .ok_or(DoliApiClientError::InvalidToken)?
-            .to_owned();
+    pub fn new(config: Config) -> Result<Client, DoliApiClientError> {
+        let token = get_password(&config.token).map_err(|_| DoliApiClientError::InvalidToken)?;
         let mut headers = HeaderMap::new();
         headers.insert(
             ACCEPT,
@@ -44,7 +42,7 @@ impl Client {
                 .default_headers(headers)
                 .build()
                 .expect("client can not be build"),
-            uri,
+            uri: config.url,
         })
     }
 }
