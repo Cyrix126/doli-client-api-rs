@@ -14,3 +14,14 @@ pub struct Config {
     /// pass file for the token used with the API of Dolibarr
     pub token: PathBuf,
 }
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            db_username: String::default(),
+            db_pass_file: PathBuf::default(),
+            url: Url::parse("https://example.net").unwrap(),
+            token: PathBuf::default(),
+        }
+    }
+}
